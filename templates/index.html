@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAV Telemetry Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 24px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        #chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>UAV Telemetry Dashboard (Real-Time)</h1>
+        <div id="chart-container">
+            <canvas id="altitudeChart"></canvas>
+        </div>
+        <div id="chart-container" style="margin-top:32px;">
+            <canvas id="speedChart"></canvas>
+        </div>
+        <div id="chart-container" style="margin-top:32px;">
+            <canvas id="batteryChart"></canvas>
+        </div>
+        <h2 style="margin-top:32px;">Latest Telemetry</h2>
+        <table id="telemetry-table" style="width:100%;margin-top:8px;border-collapse:collapse;">
+            <tr><th style='text-align:left;'>Altitude (m)</th><td id="altitude-cell">-</td></tr>
+            <tr><th style='text-align:left;'>Speed (m/s)</th><td id="speed-cell">-</td></tr>
+            <tr><th style='text-align:left;'>Battery (%)</th><td id="battery-cell">-</td></tr>
+        </table>
+        <h2 style="margin-top:32px;">Analytics (Last 20 Points)</h2>
+        <table id="analytics-table" style="width:100%;margin-top:8px;border-collapse:collapse;">
+            <tr><th></th><th>Min</th><th>Max</th><th>Avg</th></tr>
+            <tr><th style='text-align:left;'>Altitude</th><td id="altitude-min">-</td><td id="altitude-max">-</td><td id="altitude-avg">-</td></tr>
+            <tr><th style='text-align:left;'>Speed</th><td id="speed-min">-</td><td id="speed-max">-</td><td id="speed-avg">-</td></tr>
+            <tr><th style='text-align:left;'>Battery</th><td id="battery-min">-</td><td id="battery-max">-</td><td id="battery-avg">-</td></tr>
+        </table>
+        <h2 style="margin-top:32px;">Anomaly Counts (Last 20 Points)</h2>
+        <table id="anomaly-table" style="width:100%;margin-top:8px;border-collapse:collapse;">
+            <tr><th style='text-align:left;'>Low Battery (&lt;20%)</th><td id="low-battery-count">-</td></tr>
+            <tr><th style='text-align:left;'>Low Altitude (&lt;5m)</th><td id="low-altitude-count">-</td></tr>
+        </table>
+    </div>
+    <script>
+        // Rolling window for analytics
+        const windowSize = 20;
+        const telemetryWindow = [];
+
+        // Chart.js setup for altitude
+        const ctx = document.getElementById('altitudeChart').getContext('2d');
+        const altitudeData = {
+            labels: [],
+            datasets: [{
+                label: 'Altitude (m)',
+                data: [],
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 2,
+            }]
+        };
+        const altitudeChart = new Chart(ctx, {
+            type: 'line',
+            data: altitudeData,
+            options: {
+                responsive: true,
+                animation: false,
+                plugins: { legend: { display: true } },
+                scales: {
+                    x: { title: { display: true, text: 'Time' }, ticks: { autoSkip: true, maxTicksLimit: 10 } },
+                    y: { title: { display: true, text: 'Altitude (m)' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // Chart.js setup for speed
+        const speedCtx = document.getElementById('speedChart').getContext('2d');
+        const speedData = {
+            labels: [],
+            datasets: [{
+                label: 'Speed (m/s)',
+                data: [],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 2,
+            }]
+        };
+        const speedChart = new Chart(speedCtx, {
+            type: 'line',
+            data: speedData,
+            options: {
+                responsive: true,
+                animation: false,
+                plugins: { legend: { display: true } },
+                scales: {
+                    x: { title: { display: true, text: 'Time' }, ticks: { autoSkip: true, maxTicksLimit: 10 } },
+                    y: { title: { display: true, text: 'Speed (m/s)' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // Chart.js setup for battery
+        const batteryCtx = document.getElementById('batteryChart').getContext('2d');
+        const batteryData = {
+            labels: [],
+            datasets: [{
+                label: 'Battery (%)',
+                data: [],
+                borderColor: 'rgba(255, 206, 86, 1)',
+                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 2,
+            }]
+        };
+        const batteryChart = new Chart(batteryCtx, {
+            type: 'line',
+            data: batteryData,
+            options: {
+                responsive: true,
+                animation: false,
+                plugins: { legend: { display: true } },
+                scales: {
+                    x: { title: { display: true, text: 'Time' }, ticks: { autoSkip: true, maxTicksLimit: 10 } },
+                    y: { title: { display: true, text: 'Battery (%)' }, beginAtZero: true, max: 100 }
+                }
+            }
+        });
+
+        // Connect to Socket.IO for real-time updates
+        const socket = io();
+
+        // Handle incoming telemetry data
+        socket.on('telemetry', function(msg) {
+            const now = new Date();
+            const label = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString() : now.toLocaleTimeString();
+            // Update rolling window
+            telemetryWindow.push(msg);
+            if (telemetryWindow.length > windowSize) telemetryWindow.shift();
+            // Update charts
+            altitudeData.labels.push(label);
+            altitudeData.datasets[0].data.push(msg.altitude);
+            if (altitudeData.labels.length > windowSize) { altitudeData.labels.shift(); altitudeData.datasets[0].data.shift(); }
+            altitudeChart.update();
+
+            speedData.labels.push(label);
+            speedData.datasets[0].data.push(msg.speed);
+            if (speedData.labels.length > windowSize) { speedData.labels.shift(); speedData.datasets[0].data.shift(); }
+            speedChart.update();
+
+            batteryData.labels.push(label);
+            batteryData.datasets[0].data.push(msg.battery);
+            if (batteryData.labels.length > windowSize) { batteryData.labels.shift(); batteryData.datasets[0].data.shift(); }
+            batteryChart.update();
+
+            // Update telemetry table
+            document.getElementById('altitude-cell').textContent = msg.altitude !== undefined ? msg.altitude : '-';
+            document.getElementById('speed-cell').textContent = msg.speed !== undefined ? msg.speed : '-';
+            document.getElementById('battery-cell').textContent = msg.battery !== undefined ? msg.battery : '-';
+
+            // Update analytics
+            function calcStats(arr, key) {
+                const vals = arr.map(x => x[key]).filter(v => typeof v === 'number');
+                if (!vals.length) return ['-','-','-'];
+                const min = Math.min(...vals);
+                const max = Math.max(...vals);
+                const avg = (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(2);
+                return [min, max, avg];
+            }
+            const [altMin, altMax, altAvg] = calcStats(telemetryWindow, 'altitude');
+            const [spdMin, spdMax, spdAvg] = calcStats(telemetryWindow, 'speed');
+            const [batMin, batMax, batAvg] = calcStats(telemetryWindow, 'battery');
+            document.getElementById('altitude-min').textContent = altMin;
+            document.getElementById('altitude-max').textContent = altMax;
+            document.getElementById('altitude-avg').textContent = altAvg;
+            document.getElementById('speed-min').textContent = spdMin;
+            document.getElementById('speed-max').textContent = spdMax;
+            document.getElementById('speed-avg').textContent = spdAvg;
+            document.getElementById('battery-min').textContent = batMin;
+            document.getElementById('battery-max').textContent = batMax;
+            document.getElementById('battery-avg').textContent = batAvg;
+
+            // Update anomaly counts
+            let lowBat = 0, lowAlt = 0;
+            telemetryWindow.forEach(x => {
+                if (typeof x.battery === 'number' && x.battery < 20) lowBat++;
+                if (typeof x.altitude === 'number' && x.altitude < 5) lowAlt++;
+            });
+            document.getElementById('low-battery-count').textContent = lowBat;
+            document.getElementById('low-altitude-count').textContent = lowAlt;
+        });
+
+        // Listen for alert events and show browser popup
+        socket.on('alert', function(data) {
+            if (data && data.message) {
+                alert(data.message);
+            }
+        });
+    </script>
+</body>
+</html> 
