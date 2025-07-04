@@ -54,14 +54,14 @@ pip install eventlet
 python app.py
 ```
 
-- The dashboard will now automatically open in your default web browser when you run the backend. If you want to access it from a different device, open `http://localhost:5000/` manually in your browser.
+- The dashboard will now automatically open in your default web browser when you run the backend. If you want to access it from a different device, open `http://localhost:5050/` manually in your browser.
 
 ### Open the dashboard
 
 - By default, the dashboard will auto-open in your browser. If it does not, visit:
 
 ```
-http://localhost:5000/
+http://localhost:5050/
 ```
 
 ### Simulate telemetry data
@@ -82,14 +82,14 @@ Run the dummy script in no-broker mode:
 ```
 python test_mqtt_publish.py --no-mqtt
 ```
-This will POST telemetry directly to the backend, so you can demo the dashboard and all analytics/visualizations without any MQTT setup.
+This will POST telemetry directly to the backend at `http://localhost:5050/_dummy_telemetry`, so you can demo the dashboard and all analytics/visualizations without any MQTT setup.
 
 ## Android App
 - See the `mobile/` directory for Jetpack Compose app code and setup.
 
 ## Troubleshooting
 - **MQTT connection refused:** Ensure the broker is running on `localhost:1883` or use dummy mode.
-- **No data on dashboard:** Check backend logs for errors, verify MQTT topic and payload format, or use dummy mode.
+- **No data on dashboard:** Check backend logs for errors, verify MQTT topic and payload format, or use dummy mode. Make sure you are visiting [http://localhost:5050/](http://localhost:5050/).
 - **Alerts not showing:** Ensure telemetry includes `battery` and `altitude` fields.
 
 ## Performance Tips

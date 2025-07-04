@@ -12,7 +12,7 @@ import requests
 
 BROKER = 'localhost'
 TOPIC = 'uav/telemetry'
-BACKEND_URL = 'http://localhost:5000/_dummy_telemetry'  # New endpoint for direct POST
+BACKEND_URL = 'http://localhost:5050/_dummy_telemetry'  # New endpoint for direct POST
 
 USE_DIRECT_POST = '--no-mqtt' in sys.argv or publish is None
 

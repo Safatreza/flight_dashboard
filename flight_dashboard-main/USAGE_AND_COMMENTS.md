@@ -1,6 +1,6 @@
 # UAV Telemetry Dashboard — Usage & Comments
 
-**Note:** All commands below use explicit relative paths, so you can run them from anywhere inside the project directory.
+**Note:** All commands below use explicit relative paths, so you can run them from anywhere inside the project directory. The backend now runs on port 5050 by default.
 
 ---
 
@@ -19,7 +19,7 @@ pip install eventlet
 ```sh
 python flight_dashboard-main/app.py
 ```
-- The dashboard will automatically open in your default web browser at [http://localhost:5000/](http://localhost:5000/).
+- The dashboard will automatically open in your default web browser at [http://localhost:5050/](http://localhost:5050/).
 
 ---
 
@@ -36,7 +36,18 @@ python flight_dashboard-main/app.py
    ```sh
    python flight_dashboard-main/test_mqtt_publish.py --no-mqtt
    ```
-3. Open or refresh your browser at [http://localhost:5000/](http://localhost:5000/) to see real-time simulated telemetry and alerts.
+3. Open or refresh your browser at [http://localhost:5050/](http://localhost:5050/) to see real-time simulated telemetry and alerts.
+
+**What to expect:**
+- The dashboard will show live-updating charts for altitude, speed, and battery.
+- Analytics tables (min, max, avg) will update as new data arrives.
+- If the battery drops below 20% or altitude below 5m, alert popups will appear.
+- You do not need any external hardware or MQTT broker for this mode.
+
+**Troubleshooting:**
+- If you do not see data, ensure both the backend and dummy script are running, and that you are visiting the correct port (5050).
+- Check both terminal windows for errors or warnings.
+- If port 5050 is in use, stop any other process using it or change the port in `app.py` and the dummy script.
 
 ---
 
@@ -95,7 +106,7 @@ mosquitto_pub -h localhost -t uav/telemetry -m '{"altitude": 100, "speed": 12, "
 
 ## 6. Troubleshooting
 - **No data on dashboard?**
-  - Ensure `python flight_dashboard-main/app.py` is running and the dashboard is open in your browser.
+  - Ensure `python flight_dashboard-main/app.py` is running and the dashboard is open in your browser at [http://localhost:5050/](http://localhost:5050/).
   - Run the dummy script in a separate terminal using the full path.
   - Refresh the dashboard page if needed.
   - Check both terminal windows for errors or warnings.
