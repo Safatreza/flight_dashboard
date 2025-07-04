@@ -49,11 +49,6 @@ def dummy_telemetry():
 setup_mqtt(socketio)
 
 if __name__ == "__main__":
-    # Run the Flask-SocketIO server and auto-open the dashboard in your browser
-    import threading
-    import webbrowser
-    # Automatically open the dashboard in the default web browser after the server starts
-    def open_browser():
-        webbrowser.open("http://127.0.0.1:5050/")
-    threading.Timer(1.5, open_browser).start()
+    # Run the Flask-SocketIO server and print the dashboard URL for manual opening
+    print("\nDashboard is running! Open http://localhost:5050/ in your browser.\n")
     socketio.run(app, host="0.0.0.0", port=5050)

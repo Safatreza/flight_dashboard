@@ -19,7 +19,8 @@ pip install eventlet
 ```sh
 python flight_dashboard-main/app.py
 ```
-- The dashboard will automatically open in your default web browser at [http://localhost:5050/](http://localhost:5050/).
+- **After starting, open the dashboard manually in your browser:**
+  [http://localhost:5050/](http://localhost:5050/)
 
 ---
 
@@ -36,7 +37,9 @@ python flight_dashboard-main/app.py
    ```sh
    python flight_dashboard-main/test_mqtt_publish.py --no-mqtt
    ```
-3. Open or refresh your browser at [http://localhost:5050/](http://localhost:5050/) to see real-time simulated telemetry and alerts.
+3. **Open or refresh your browser at:**
+   [http://localhost:5050/](http://localhost:5050/)
+   to see real-time simulated telemetry and alerts.
 
 **What to expect:**
 - The dashboard will show live-updating charts for altitude, speed, and battery.
