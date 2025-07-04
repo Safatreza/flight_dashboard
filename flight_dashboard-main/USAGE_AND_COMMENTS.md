@@ -1,14 +1,14 @@
 # UAV Telemetry Dashboard — Usage & Comments
 
-This document provides a quick reference for running the project, understanding each module, and reviewing the main code comments. Copy-paste commands as needed!
+**Note:** All commands below use explicit relative paths, so you can run them from anywhere inside the project directory.
 
 ---
 
 ## 1. Setup & Installation
 
 ```sh
-# Install Python dependencies
-pip install -r requirements.txt
+# Install Python dependencies (from project root or any subdirectory)
+pip install -r flight_dashboard-main/requirements.txt
 pip install eventlet
 ```
 
@@ -17,7 +17,7 @@ pip install eventlet
 ## 2. Running the Backend (Dashboard Server)
 
 ```sh
-python app.py
+python flight_dashboard-main/app.py
 ```
 - The dashboard will automatically open in your default web browser at [http://localhost:5000/](http://localhost:5000/).
 
@@ -26,7 +26,7 @@ python app.py
 ## 3. Simulating Telemetry Data (Dummy Mode)
 
 ```sh
-python test_mqtt_publish.py --no-mqtt
+python flight_dashboard-main/test_mqtt_publish.py --no-mqtt
 ```
 - This sends random telemetry data directly to the backend for demo/testing (no MQTT broker required).
 
@@ -41,7 +41,7 @@ mosquitto
 
 Then run:
 ```sh
-python test_mqtt_publish.py
+python flight_dashboard-main/test_mqtt_publish.py
 ```
 - Or publish manually:
 ```sh
@@ -87,8 +87,8 @@ mosquitto_pub -h localhost -t uav/telemetry -m '{"altitude": 100, "speed": 12, "
 
 ## 6. Troubleshooting
 - **No data on dashboard?**
-  - Ensure `app.py` is running and the dashboard is open in your browser.
-  - Run the dummy script in a separate terminal.
+  - Ensure `python flight_dashboard-main/app.py` is running and the dashboard is open in your browser.
+  - Run the dummy script in a separate terminal using the full path.
   - Refresh the dashboard page if needed.
   - Check both terminal windows for errors or warnings.
 
@@ -98,7 +98,7 @@ mosquitto_pub -h localhost -t uav/telemetry -m '{"altitude": 100, "speed": 12, "
 
 ```sh
 git add .
-git commit -m "Add usage and comments markdown; improve code comments"
+git commit -m "Update project and usage docs for explicit path commands"
 git push
 ```
 
