@@ -54,6 +54,6 @@ if __name__ == "__main__":
     import webbrowser
     # Automatically open the dashboard in the default web browser after the server starts
     def open_browser():
-        webbrowser.open("http://127.0.0.1:5000/")
+        webbrowser.open("http://127.0.0.1:5050/")
     threading.Timer(1.5, open_browser).start()
-    socketio.run(app, host="0.0.0.0", port=5000)
+    socketio.run(app, host="0.0.0.0", port=5050)
