@@ -1,6 +1,6 @@
 # UAV Telemetry Dashboard — Usage & Comments
 
-**Note:** All commands below use explicit relative paths, so you can run them from anywhere inside the project directory. The backend now runs on port 5050 by default.
+**Note:** The dashboard is now served as a static site using Python's built-in HTTP server. Real-time features (if needed) are still provided by the backend on port 5050.
 
 ---
 
@@ -14,22 +14,27 @@ pip install eventlet
 
 ---
 
-## 2. Running the Backend (Dashboard Server)
+## 2. Serving the Dashboard (Static Mode)
 
-```sh
-python flight_dashboard-main/app.py
-```
-- **After starting, open the dashboard manually in your browser:**
-  [http://localhost:5050/](http://localhost:5050/)
+1. **Serve the dashboard with Python's HTTP server:**
+   ```sh
+   python -m http.server 8050 --directory flight_dashboard-main/static_dashboard
+   ```
+2. **Open the dashboard in your browser:**
+   ```sh
+   python -m webbrowser http://localhost:8050/index.html
+   # Or manually visit:
+   # http://localhost:8050/index.html
+   ```
 
 ---
 
-## 3. Running in Dummy Mode (No MQTT Broker Required)
+## 3. Running in Dummy Mode (No MQTT Broker Required, Real-Time Features)
 
 **Dummy mode** allows you to demo and visualize the dashboard, analytics, and alerting features even if you do not have an MQTT broker installed or running. This is ideal for quick demos, development, or sharing the project with others.
 
 **Steps:**
-1. Start the backend server (if not already running):
+1. Start the backend server (for real-time data):
    ```sh
    python flight_dashboard-main/app.py
    ```
@@ -37,9 +42,9 @@ python flight_dashboard-main/app.py
    ```sh
    python flight_dashboard-main/test_mqtt_publish.py --no-mqtt
    ```
-3. **Open or refresh your browser at:**
-   [http://localhost:5050/](http://localhost:5050/)
-   to see real-time simulated telemetry and alerts.
+3. Open or refresh your browser at:
+   [http://localhost:8050/index.html](http://localhost:8050/index.html)
+   (The dashboard will connect to the backend at port 5050 for real-time data.)
 
 **What to expect:**
 - The dashboard will show live-updating charts for altitude, speed, and battery.
@@ -48,9 +53,9 @@ python flight_dashboard-main/app.py
 - You do not need any external hardware or MQTT broker for this mode.
 
 **Troubleshooting:**
-- If you do not see data, ensure both the backend and dummy script are running, and that you are visiting the correct port (5050).
+- If you do not see data, ensure both the backend and dummy script are running, and that you are visiting the correct port (8050 for the dashboard, 5050 for backend API).
 - Check both terminal windows for errors or warnings.
-- If port 5050 is in use, stop any other process using it or change the port in `app.py` and the dummy script.
+- If port 5050 or 8050 is in use, stop any other process using it or change the port in the relevant command or code.
 
 ---
 
@@ -75,41 +80,22 @@ mosquitto_pub -h localhost -t uav/telemetry -m '{"altitude": 100, "speed": 12, "
 ## 5. Module Purposes & Key Comments
 
 ### `app.py`
-- **Purpose:** Main backend server. Hosts the dashboard, handles telemetry (via MQTT or direct POST), emits real-time updates to the frontend.
-- **Key Comments:**
-  - "Main backend server for the UAV Telemetry Dashboard"
-  - "Hosts the web dashboard"
-  - "Handles telemetry data (via MQTT or direct POST)"
-  - "Emits real-time updates to frontend via Socket.IO"
-  - "Accepts telemetry data via POST for demo/testing without MQTT broker. Emits telemetry and alert events to frontend via Socket.IO."
-  - "Setup MQTT client and handlers (runs in background thread)"
+- **Purpose:** Main backend server. Hosts the real-time API, handles telemetry (via MQTT or direct POST), emits real-time updates to the frontend.
 
 ### `mqtt_handler.py`
 - **Purpose:** Manages the MQTT connection, subscribes to telemetry, forwards data and alerts to the backend, and handles anomaly detection and logging.
-- **Key Comments:**
-  - "This module manages the MQTT connection for the UAV Telemetry Dashboard backend."
-  - "Connects to the MQTT broker"
-  - "Subscribes to telemetry topic"
-  - "Forwards telemetry and alerts to the Flask-SocketIO server"
-  - "Handles anomaly detection and logging"
-  - "Callback for when the client receives a CONNACK response from the MQTT broker. Subscribes to the telemetry topic on successful connection."
-  - "Callback for when the client disconnects from the broker. Logs the disconnection and attempts to reconnect if unexpected."
-  - "Callback for when a PUBLISH message is received from the broker. Parses telemetry, emits to SocketIO, and checks for anomalies."
-  - "Runs the MQTT network loop forever in a background thread. Handles incoming messages and maintains connection."
-  - "Start the MQTT client loop in a daemon thread"
 
 ### `test_mqtt_publish.py`
 - **Purpose:** Dummy telemetry publisher for testing/demo, can send data via MQTT or direct POST.
-- **Usage:** See above commands.
 
-### `templates/index.html`
-- **Purpose:** Frontend dashboard, connects via Socket.IO, displays real-time charts, analytics, and alerts.
+### `static_dashboard/index.html`
+- **Purpose:** Frontend dashboard, connects via Socket.IO to the backend, displays real-time charts, analytics, and alerts.
 
 ---
 
 ## 6. Troubleshooting
 - **No data on dashboard?**
-  - Ensure `python flight_dashboard-main/app.py` is running and the dashboard is open in your browser at [http://localhost:5050/](http://localhost:5050/).
+  - Ensure the backend is running (`python flight_dashboard-main/app.py`) and the dashboard is open in your browser at [http://localhost:8050/index.html](http://localhost:8050/index.html).
   - Run the dummy script in a separate terminal using the full path.
   - Refresh the dashboard page if needed.
   - Check both terminal windows for errors or warnings.
@@ -120,7 +106,7 @@ mosquitto_pub -h localhost -t uav/telemetry -m '{"altitude": 100, "speed": 12, "
 
 ```sh
 git add .
-git commit -m "Update project and usage docs for explicit path commands"
+git commit -m "Switch to static dashboard server structure, update usage docs"
 git push
 ```
 
