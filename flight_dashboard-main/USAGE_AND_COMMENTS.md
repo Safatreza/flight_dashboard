@@ -23,12 +23,20 @@ python flight_dashboard-main/app.py
 
 ---
 
-## 3. Simulating Telemetry Data (Dummy Mode)
+## 3. Running in Dummy Mode (No MQTT Broker Required)
 
-```sh
-python flight_dashboard-main/test_mqtt_publish.py --no-mqtt
-```
-- This sends random telemetry data directly to the backend for demo/testing (no MQTT broker required).
+**Dummy mode** allows you to demo and visualize the dashboard, analytics, and alerting features even if you do not have an MQTT broker installed or running. This is ideal for quick demos, development, or sharing the project with others.
+
+**Steps:**
+1. Start the backend server (if not already running):
+   ```sh
+   python flight_dashboard-main/app.py
+   ```
+2. In a new terminal, run the dummy publisher in no-broker mode:
+   ```sh
+   python flight_dashboard-main/test_mqtt_publish.py --no-mqtt
+   ```
+3. Open or refresh your browser at [http://localhost:5000/](http://localhost:5000/) to see real-time simulated telemetry and alerts.
 
 ---
 
