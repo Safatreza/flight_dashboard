@@ -1,14 +1,12 @@
-# UAV Telemetry Dashboard — Quick Start (Simplified Dummy Mode)
+# UAV Telemetry Dashboard — Universal Quick Start (No Static Directory Needed)
 
-Get started in just a few steps!
+Get your dashboard running from anywhere in your project—no need to be in a specific folder!
 
 ---
 
 ## 1. Start Dummy Data and Backend
 
-From your project root (`D:/Flight_Dashboard/flight_dashboard-main`):
-
-**Open two terminals:**
+Open two terminals (from anywhere inside your project folder):
 
 **Terminal 1:** Start the backend server:
 ```sh
@@ -24,25 +22,25 @@ python flight_dashboard-main/test_mqtt_publish.py --no-mqtt
 
 ## 2. Open the Dashboard UI
 
-In a third terminal, run:
+The backend server also serves the dashboard UI. Once the backend is running, simply open your browser and go to:
+```
+http://localhost:5000/
+```
+
+Or, to open it automatically from the terminal (Windows):
 ```sh
-python -m http.server 8050 --directory flight_dashboard-main/static_dashboard
+start http://localhost:5000/
 ```
 
-Then open your browser and go to:
-```
-http://localhost:8050/index.html
-```
-
-You should now see live-updating charts and alerts as dummy data streams in!
+You should see the dashboard UI with live-updating charts and alerts as dummy data streams in.
 
 ---
 
 ## Troubleshooting
-- **404 Error?**
-  - Make sure you ran the http.server command above from the project root.
-  - Visit `http://localhost:8050/index.html` in your browser.
-  - Confirm `index.html` exists in `flight_dashboard-main/static_dashboard/`.
+- **404 or Not Found?**
+  - Make sure you started the backend server (`python flight_dashboard-main/app.py`).
+  - Visit `http://localhost:5000/` in your browser.
+  - Ensure `index.html` exists in the correct templates directory for Flask (usually `flight_dashboard-main/templates/`).
 - **No Data?**
   - Ensure both the backend and dummy publisher are running.
 
